@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import AIPDFAnalyzer from "../components/AIPDFAnalyzer";
 import AIResolutionGenerator from "../components/AIResolutionGenerator";
+import VisualForensicsCard from "../components/VisualForensicsCard";
 import Confetti from "react-confetti";
 import { useNavigate } from "react-router-dom";
 function GrievanceDetail() {
@@ -475,6 +476,9 @@ function GrievanceDetail() {
                         </div>
                     </div>
                     {}
+                    {/* Visual Evidence Forensics Card */}
+                    <VisualForensicsCard grievance={grievance} />
+
                     <AIResolutionGenerator 
                         grievanceCode={grievanceCode}
                         onResolutionGenerated={handleResolutionGenerated}

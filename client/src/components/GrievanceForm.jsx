@@ -778,13 +778,28 @@ const GrievanceForm = ({ setActivePage }) => {
                 className="hidden"
               />
               {file && (
-                <div className="p-3 bg-green-50 border-l-4 border-green-600 rounded">
-                  <p className="text-sm text-green-800 font-medium">
-                    ✅ File selected: {file.name}
-                  </p>
-                  <p className="text-xs text-green-600 mt-1">
-                    Size: {(file.size / 1024 / 1024).toFixed(2)} MB
-                  </p>
+                <div className="p-3 bg-green-50 border-l-4 border-green-600 rounded space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-green-800 font-medium">
+                        ✅ File selected: {file.name}
+                      </p>
+                      <p className="text-xs text-green-600 mt-0.5">
+                        Size: {(file.size / 1024 / 1024).toFixed(2)} MB
+                      </p>
+                    </div>
+                    {file.type && file.type.startsWith('image/') && (
+                      <img
+                        src={URL.createObjectURL(file)}
+                        alt="Preview"
+                        className="h-12 w-12 object-cover rounded border border-green-300"
+                      />
+                    )}
+                  </div>
+                  <div className="flex items-center gap-1.5 text-xs text-blue-700 bg-blue-50/80 p-2 rounded border border-blue-200">
+                    <span>🛡️</span>
+                    <span><strong>Visual & Location Verification:</strong> Evidence will be verified for genuine on-site capture.</span>
+                  </div>
                 </div>
               )}
             </div>

@@ -7,15 +7,30 @@ const { generateResolutionPDF } = require("../services/pdfGenerator");
 const { detectDuplicateComplaints } = require("../services/duplicateDetection");
 const { onComplaintRegistered, onStatusUpdated } = require("../services/notificationEngine");
 const { calculateBacklogAwareEta } = require("../services/etaService");
+const { verifyVisualEvidence } = require("../services/visualVerificationEngine");
 const fs = require("fs");
 const { GridFSBucket } = require("mongodb");
 const mongoose = require("mongoose");
 const router = express.Router();
+
 router.post("/", checkLogin, async (req, res) => {
     const username = req.user.user.name;
     const email = req.user.user.email;
     const { department, description, location, category, subcategory } = req.body;
     try {
+        let visualVerification = {
+            status: "NO_MEDIA",
+            trustScore: 100,
+            isAiGenerated: false,
+            isManipulated: false,
+            matchesCategory: true,
+            detectedIssue: "No media attached",
+            exifData: { hasGps: false },
+            locationDistanceKm: null,
+            flags: [],
+            summary: "Text-only complaint filed without visual evidence."
+        };
+
         if (req.body.fileName) {
             try {
                 const bucket = new GridFSBucket(mongoose.connection.db, { bucketName: "uploads" });
@@ -33,15 +48,19 @@ router.post("/", checkLogin, async (req, res) => {
                         }
                         const fileBuffer = Buffer.concat(chunks);
                         
-                        const spamResult = await analyzeGrievanceEvidence(description, category, fileBuffer, mimeType);
-                        
-                        if (spamResult.isSpam) {
-                            return res.status(400).json({ error: "Your uploaded image was flagged as invalid: " + spamResult.reasoning });
-                        }
+                        visualVerification = await verifyVisualEvidence({
+                            imageBuffer: fileBuffer,
+                            mimeType,
+                            claimedLocation: location,
+                            category,
+                            subcategory,
+                            description,
+                            department
+                        });
                     }
                 }
-            } catch (spamCheckError) {
-                console.error("Spam check failed", spamCheckError);
+            } catch (visualVerifyError) {
+                console.error("Visual verification warning:", visualVerifyError.message);
             }
         }
 
@@ -68,6 +87,7 @@ router.post("/", checkLogin, async (req, res) => {
             description,
             fileName: req.body.fileName,
             location: location || null,
+            visualVerification,
             priority: priorityData.priority,
             priorityReason: priorityData.priorityReason,
             serviceDepartmentKey: etaData.department,
@@ -86,7 +106,11 @@ router.post("/", checkLogin, async (req, res) => {
             etaMessage: etaData.message,
             etaCalculatedAt: etaData.calculatedAt
         });
-        console.log('Grievance with priority:', grievance);
+        console.log('Grievance created with visual verification:', {
+            code: grievance.grievanceCode,
+            visualStatus: visualVerification.status,
+            trustScore: visualVerification.trustScore
+        });
         const newGrievance = await grievance.save();
 
         try {
@@ -102,6 +126,46 @@ router.post("/", checkLogin, async (req, res) => {
     } catch (err) {
         console.error('Error creating grievance:', err);
         res.status(400).json({ error: err.message });
+    }
+});
+
+// Endpoint for preview verification of uploaded visual evidence
+router.post("/verify-evidence-preview", async (req, res) => {
+    try {
+        const { fileName, location, category, subcategory, description, department } = req.body;
+        if (!fileName) {
+            return res.status(400).json({ error: "fileName is required" });
+        }
+        const bucket = new GridFSBucket(mongoose.connection.db, { bucketName: "uploads" });
+        const file = await mongoose.connection.db.collection("uploads.files").findOne({ filename: fileName });
+        if (!file) {
+            return res.status(404).json({ error: "Uploaded file not found in storage" });
+        }
+        const ext = fileName.split('.').pop().toLowerCase();
+        const contentTypes = { 'pdf': 'application/pdf', 'png': 'image/png', 'jpg': 'image/jpeg', 'jpeg': 'image/jpeg', 'webp': 'image/webp' };
+        const mimeType = contentTypes[ext] || "image/jpeg";
+
+        const downloadStream = bucket.openDownloadStream(file._id);
+        const chunks = [];
+        for await (const chunk of downloadStream) {
+            chunks.push(chunk);
+        }
+        const fileBuffer = Buffer.concat(chunks);
+
+        const verification = await verifyVisualEvidence({
+            imageBuffer: fileBuffer,
+            mimeType,
+            claimedLocation: location,
+            category,
+            subcategory,
+            description,
+            department
+        });
+
+        res.json({ success: true, verification });
+    } catch (err) {
+        console.error("Preview verification error:", err.message);
+        res.status(500).json({ error: err.message });
     }
 });
 router.get("/", checkLogin, async (req, res) => {

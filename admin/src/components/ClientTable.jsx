@@ -155,6 +155,33 @@ const ClientTable = ({ grievances: propGrievances }) => {
         );
     };
 
+    const getVisualBadge = (client) => {
+        const v = client?.visualVerification;
+        if (!v || v.status === "NO_MEDIA") return null;
+        if (v.status === "VERIFIED") {
+            return (
+                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-semibold text-emerald-800" title={`Verified Real Evidence (${v.trustScore || 85}%)`}>
+                    🛡️ Verified
+                </span>
+            );
+        }
+        if (v.status === "SUSPICIOUS") {
+            return (
+                <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-800" title="Visual anomalies or location offset detected">
+                    ⚠️ Review
+                </span>
+            );
+        }
+        if (v.status === "FLAGGED") {
+            return (
+                <span className="inline-flex items-center gap-1 rounded-full bg-rose-100 px-2 py-0.5 text-[11px] font-semibold text-rose-800" title="Flagged: Likely AI or severe mismatch">
+                    🚨 Flagged
+                </span>
+            );
+        }
+        return null;
+    };
+
     return (
         <div data-guide="register-complaint" className="mx-auto">
             <FilterTabs grievances={propGrievances || []} setFilteredGrievances={setFilteredGrievances} />
@@ -190,13 +217,9 @@ const ClientTable = ({ grievances: propGrievances }) => {
                                 };
                                 return (
                                     <tr
-                                        key={index}
-                                        className={`cursor-pointer border-b border-gray-100 hover:bg-gray-50 ${
-                                            client.isEscalated 
-                                                ? "bg-red-50" 
-                                                : index % 2 === 0 ? "bg-white" : "bg-gray-50/40"
-                                        }`}
+                                        key={client.grievanceCode}
                                         onClick={() => navigate(`/grievance/${client.grievanceCode}`)}
+                                        className="cursor-pointer transition hover:bg-slate-50"
                                     >
                                         <td className="px-4 py-3 font-semibold text-gray-800">
                                             <div className="flex items-center gap-2">
@@ -208,6 +231,11 @@ const ClientTable = ({ grievances: propGrievances }) => {
                                                 )}
                                                 <span>{client.grievanceCode}</span>
                                             </div>
+                                            {getVisualBadge(client) && (
+                                                <div className="mt-1">
+                                                    {getVisualBadge(client)}
+                                                </div>
+                                            )}
                                             {client.isDuplicate && (
                                                 <div className="mt-1">
                                                     <span className="rounded-full bg-fuchsia-100 px-2 py-1 text-xs text-fuchsia-700">

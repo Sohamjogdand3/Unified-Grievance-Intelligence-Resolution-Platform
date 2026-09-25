@@ -1,8 +1,13 @@
 const mongoose = require('mongoose');
 require('dotenv').config();
-const connectDB = async () => {
+
+const connectDB = async (customUri) => {
     try {
-        await mongoose.connect(process.env.MONGO_URI + '/nagrikconnect');
+        let uri = customUri || process.env.MONGO_URI || 'mongodb://localhost:27017';
+        if (!uri.includes('/nagrikconnect') && !uri.includes('?')) {
+            uri = uri.replace(/\/+$/, '') + '/nagrikconnect';
+        }
+        await mongoose.connect(uri);
         console.log('✅ MongoDB connected to local database: nagrikconnect');
         console.log('📍 Database location: mongodb/data/');
     } catch (err) {
@@ -11,4 +16,5 @@ const connectDB = async () => {
         process.exit(1);
     }
 };
-module.exports = {connectDB}
+
+module.exports = { connectDB };

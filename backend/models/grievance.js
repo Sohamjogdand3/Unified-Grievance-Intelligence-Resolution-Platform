@@ -122,7 +122,38 @@ const GrievanceSchema = new mongoose.Schema({
     reply: String,
     replyDocument: String,
     repliedAt: Date
-  }]
+  }],
+  visualVerification: {
+    status: {
+      type: String,
+      enum: ["VERIFIED", "SUSPICIOUS", "FLAGGED", "NO_MEDIA", "METADATA_ONLY"],
+      default: "NO_MEDIA"
+    },
+    trustScore: { type: Number, default: 100 },
+    isAiGenerated: { type: Boolean, default: false },
+    isManipulated: { type: Boolean, default: false },
+    matchesCategory: { type: Boolean, default: true },
+    detectedIssue: String,
+    documentType: String,
+    issuingAuthority: String,
+    extractedDetails: {
+      referenceOrConsumerNo: String,
+      documentDate: String,
+      amountOrKeyMetric: String
+    },
+    exifData: {
+      hasGps: { type: Boolean, default: false },
+      latitude: Number,
+      longitude: Number,
+      altitude: Number,
+      timestamp: Date,
+      device: String,
+      software: String
+    },
+    locationDistanceKm: Number,
+    flags: [String],
+    summary: String
+  }
 }, { timestamps: true });
 GrievanceSchema.pre("save", async function (next) {
   if (!this.grievanceCode) {
