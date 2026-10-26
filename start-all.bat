@@ -30,6 +30,16 @@ start "Python Server" cmd /k "color 0E && echo Python Server Running... && pytho
 cd ..
 timeout /t 3 /nobreak > nul
 
+call :START_SERVICE "RAG Knowledge Service" "8001"
+cd rag_service
+if exist "venv\Scripts\python.exe" (
+    start "RAG Knowledge Service" cmd /k "color 09 && echo RAG Knowledge Service Running... && venv\Scripts\python.exe -m uvicorn backend.app:app --host 127.0.0.1 --port 8001 --reload"
+) else (
+    start "RAG Knowledge Service" cmd /k "color 09 && echo RAG Knowledge Service Running... && python -m uvicorn backend.app:app --host 127.0.0.1 --port 8001 --reload"
+)
+cd ..
+timeout /t 3 /nobreak > nul
+
 call :START_SERVICE "Admin Panel" "5174"
 cd admin
 start "Admin Panel" cmd /k "color 0D && echo Admin Panel Running... && npm run dev"
@@ -49,6 +59,7 @@ echo.
 echo MongoDB: mongodb://localhost:27017
 echo Backend: http://localhost:5000
 echo Python API: http://localhost:8000
+echo RAG Service: http://localhost:8001
 echo Admin: http://localhost:5174
 echo Client: http://localhost:5173
 echo.

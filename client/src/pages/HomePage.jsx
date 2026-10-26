@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { FiMenu, FiX, FiGrid, FiBell, FiMessageCircle, FiPlus, FiSearch, FiActivity, FiGlobe, FiLogOut } from "react-icons/fi";
-import Footer from "../components/Footer";
 import HomeHeader from "../components/HomeHeader";
 import Home from "../components/Home";
 import Status from "../components/Status";
@@ -182,7 +181,6 @@ function HomePage() {
     }
     switch (activePage) {
       case "home":
-      case "home":
         return <Home key={user?.email} />;
       case "Submit":
         return <Complaints />;
@@ -265,8 +263,6 @@ function HomePage() {
           </main>
         </div>
       </div>
-
-      <Footer />
     </div>
   );
 }

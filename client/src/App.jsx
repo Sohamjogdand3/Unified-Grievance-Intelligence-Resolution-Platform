@@ -4,6 +4,7 @@ import LandingPage from './pages/LandingPage';
 import HomePage from './pages/HomePage';
 import GrievanceDetailPage from './pages/GrievanceDetailPage';
 import HowItWorksPage from './pages/HowItWorksPage';
+import AboutUsPage from './pages/AboutUsPage';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import LoginForm from './components/login';
 import SignupForm from './components/SignUp';
@@ -22,7 +23,7 @@ import TourController from './components/TourController';
 
 function App() {
   const location = useLocation();
-  const showNavbar = ["/", "/complaints", "/faqs", "/contact", "/how-it-works"].includes(location.pathname);
+  const showNavbar = ["/", "/complaints", "/faqs", "/contact", "/how-it-works", "/about"].includes(location.pathname);
   const isDashboard = location.pathname.startsWith("/homepage");
 
   return (
@@ -44,6 +45,7 @@ function App() {
         <Route path="/complaints" element={<Complaints />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/how-it-works" element={<HowItWorksPage />} />
+        <Route path="/about" element={<AboutUsPage />} />
         <Route path='/status' element={<Home />} />
         <Route path="/homepage/complaints" element={<Complaints />} />
         <Route path="/homepage/contact" element={<Contact />} />

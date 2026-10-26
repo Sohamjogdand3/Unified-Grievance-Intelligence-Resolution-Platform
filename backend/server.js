@@ -12,6 +12,7 @@ const duplicateDetectionRouter = require("./routers/duplicateDetection");
 const { autoEscalateGrievances } = require("./services/escalationEngine");
 const socialListenerRouter = require("./routers/socialListener");
 const socialProofRouter = require("./routers/socialProof");
+const knowledgeRouter = require("./routers/knowledge");
 const { startSocialComplaintListener } = require("./services/socialComplaintListener");
 // const { startTwitterPolling } = require("./services/realTwitterScraper");
 const cookieParser = require("cookie-parser");
@@ -118,6 +119,8 @@ app.use("/escalation", escalationRouter);
 app.use("/duplicate-detection", duplicateDetectionRouter);
 app.use("/social-listener", socialListenerRouter);
 app.use("/social-proof", socialProofRouter);
+app.use("/api/knowledge", knowledgeRouter);
+app.use("/knowledge", knowledgeRouter);
 app.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
     console.log('🚀 Escalation engine started. Checking every 1 minute for critical cases...');

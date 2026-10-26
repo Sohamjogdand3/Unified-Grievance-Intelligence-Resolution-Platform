@@ -1,5 +1,9 @@
 /backend/node_modules
 /scripts/__pycache__
+/rag_service/backend/__pycache__
+/rag_service/venv/
+/rag_service/.venv/
+**/__pycache__/
 
 # Environment variables
 .env
